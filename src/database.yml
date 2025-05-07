@@ -11,11 +11,14 @@ Protocols:
             uri: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/train.lst
             annotation: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/train.rttm
             annotated: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/train.uem
+            torchaudio.info: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/metadata/{uri}.info
         development:
             uri: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/dev.lst
             annotation: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/dev.rttm
             annotated: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/dev.uem
+            torchaudio.info: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/metadata/{uri}.info
         test:
             uri: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/test.lst
             annotation: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/test.rttm
             annotated: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/test.uem
+            torchaudio.info: /home/nele_pauline_suffo/ProcessedData/vtc_childlens/metadata/{uri}.info
