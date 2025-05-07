@@ -30,7 +30,7 @@ class CosineAnnealingWithWarmup(_LRScheduler):
             )
             return [lr for _ in self.optimizer.param_groups]
 
-class CustomMultiLabelModel(Model):
+class VoiceTypeClassifier(Model):
     """Sophisticated multilabel segmentation model for ChildLens.SpeakerDiarization.audio
     
     SincNet > Transformer > Feed forward > Classifier
