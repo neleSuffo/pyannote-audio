@@ -5,6 +5,13 @@ from pyannote.audio.models.segmentation import PyanNet, SSeRiouSS
 from voice_type_classifier import VoiceTypeClassifier
 from pytorch_lightning import Trainer
 
+# Register loader for .info files
+def info_loader(path: str):
+    """Load .info files as torchaudio.info metadata"""
+    return torch.load(path)
+
+register_loader(".info", info_loader)
+
 # Load the ChildLens dataset
 file_finder = FileFinder()
 registry.load_database("/home/nele_pauline_suffo/projects/pyannote-audio/src/database.yml")
