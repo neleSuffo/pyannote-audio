@@ -8,7 +8,7 @@ import pytorch_lightning as pl
 file_finder = FileFinder()
 
 # Load the ChildLens dataset
-registry.load_database("/home/nele_pauline_suffo/projects/pyannote-audio-train/database.yml")
+registry.load_database("/home/nele_pauline_suffo/projects/pyannote-audio/src/database.yml")
 protocol = registry.get_protocol('ChildLens.SpeakerDiarization.audio', preprocessors={"audio": lambda x: str(file_finder(x))})
 
 # Define the MultiLabelSegmentation task
