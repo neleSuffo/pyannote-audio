@@ -1,3 +1,4 @@
+import torch
 from pyannote.database import registry, FileFinder
 from pyannote.audio.tasks import MultiLabelSegmentation
 from pyannote.audio.models.segmentation import PyanNet, SSeRiouSS
@@ -27,10 +28,10 @@ mls_model = VoiceTypeClassifier(
 )
 
 # Create a PyTorch Lightning trainer and fit the model
-trainer = pl.Trainer(
+trainer = Trainer(
     devices=1,
     accelerator="gpu" if torch.cuda.is_available() else "cpu",
-    max_epochs=200,
+    max_epochs=1,
     default_root_dir="train/"
 )
 trainer.fit(mls_model)
