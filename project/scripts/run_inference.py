@@ -4,7 +4,7 @@ import torch
 from pyannote.audio import Inference
 from pyannote.audio.pipelines import MultiLabelSegmentation as MultiLabelSegmentationPipeline
 from pyannote.database import registry, FileFinder
-from pyannote.metrics.diarization import DetectionErrorRate
+from pyannote.metrics.diarization import DiarizationErrorRate
 from pytorch_lightning import LightningModule
 import logging
 
@@ -56,7 +56,7 @@ def run_inference():
         logger.info("Instantiated pipeline with optimized parameters")
 
         # Initialize metric
-        metric = DetectionErrorRate()
+        metric = DiarizationErrorRate()
         logger.info("Initialized DetectionErrorRate metric")
 
         # Run inference and evaluation
