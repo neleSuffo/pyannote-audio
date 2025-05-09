@@ -5,7 +5,7 @@ from pyannote.audio import Inference
 from pyannote.audio.pipelines import MultiLabelSegmentation as MultiLabelSegmentationPipeline
 from pyannote.database import registry, FileFinder
 from pyannote.metrics.diarization import DiarizationErrorRate
-from pytorch_lightning import LightningModule
+from pyannote.audio.models.segmentation import SSeRiouSS
 import logging
 
 # Set up logging
@@ -38,7 +38,7 @@ def run_inference():
         logger.info("Loaded ChildLens dataset")
 
         # Load model
-        mls_model = LightningModule.load_from_checkpoint(checkpoint_path)
+        mls_model = SSeRiouSS.load_from_checkpoint(checkpoint_path)
         logger.info("Loaded trained model from checkpoint")
 
         # Initialize pipeline
