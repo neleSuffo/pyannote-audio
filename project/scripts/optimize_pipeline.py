@@ -51,7 +51,7 @@ def optimize_pipeline():
                 "OCH": {"onset": 0.6, "offset": 0.4},
                 "FEM": {"onset": 0.6, "offset": 0.4},
                 "MAL": {"onset": 0.6, "offset": 0.4},
-                "SPEECH": {"onset": 0.6, "offset": 0.4},
+                "OVH": {"onset": 0.6, "offset": 0.4},
             },
             "min_duration_on": 0.0,
             "min_duration_off": 0.0,
