@@ -5,7 +5,7 @@ from pyannote.audio.tasks import MultiLabelSegmentation
 import logging
 
 # Set up logging
-logging.basicConfig(level=logging.INFO, filename='outputs/prepare_data.log', filemode='w')
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def prepare_data():
