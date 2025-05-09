@@ -3,7 +3,7 @@ import json
 from pyannote.database import registry, FileFinder
 from pyannote.audio.pipelines import MultiLabelSegmentation as MultiLabelSegmentationPipeline
 from pyannote.pipeline import Optimizer
-from pytorch_lightning import LightningModule
+from pyannote.audio.models.segmentation import SSeRiouSS
 import logging
 
 # Set up logging
@@ -33,7 +33,7 @@ def optimize_pipeline():
         logger.info("Loaded ChildLens dataset")
 
         # Load model
-        mls_model = LightningModule.load_from_checkpoint(checkpoint_path)
+        mls_model = SSeRiouSS.load_from_checkpoint(checkpoint_path)
         logger.info("Loaded trained model from checkpoint")
 
         # Initialize pipeline
@@ -47,11 +47,11 @@ def optimize_pipeline():
         # Define initial parameters
         initial_params = {
             "thresholds": {
-                "kchi": {"onset": 0.6, "offset": 0.4},
-                "och": {"onset": 0.6, "offset": 0.4},
-                "fem": {"onset": 0.6, "offset": 0.4},
-                "mal": {"onset": 0.6, "offset": 0.4},
-                "ovh": {"onset": 0.6, "offset": 0.4},
+                "KCHI": {"onset": 0.6, "offset": 0.4},
+                "OCH": {"onset": 0.6, "offset": 0.4},
+                "FEM": {"onset": 0.6, "offset": 0.4},
+                "MAL": {"onset": 0.6, "offset": 0.4},
+                "SPEECH": {"onset": 0.6, "offset": 0.4},
             },
             "min_duration_on": 0.0,
             "min_duration_off": 0.0,
