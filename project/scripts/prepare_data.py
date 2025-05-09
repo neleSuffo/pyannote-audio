@@ -31,9 +31,9 @@ def prepare_data():
         mls_task = MultiLabelSegmentation(
             protocol,
             duration=2.0,
-            batch_size=32,
-            num_workers=4,
-            classes=['kchi', 'och', 'mal', 'fem', 'ovh']
+            batch_size=64,
+            num_workers=47,
+            classes=['KCHI', 'CHI', 'MAL', 'FEM', 'OVH']
         )
         logger.info("Configured MultiLabelSegmentation task")
 
