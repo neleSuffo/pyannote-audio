@@ -21,11 +21,11 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "Running inference..."
-python scripts/run_inference.py
-if [ $? -ne 0 ]; then
-    echo "Inference failed"
-    exit 1
-fi
+# echo "Running inference..."
+# python scripts/run_inference.py
+# if [ $? -ne 0 ]; then
+#     echo "Inference failed"
+#     exit 1
+# fi
 
 echo "All scripts completed successfully"
