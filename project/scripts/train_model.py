@@ -25,13 +25,21 @@ def train_model():
         )
         logger.info("Loaded ChildLens dataset")
 
+        # Create default augmentation instance
+        # pyannote.audio uses torch_audiomentations.Identity by default if no augmentation is provided.
+        # We explicitly create it here to set the 'target_rate' attribute to potentially silence the warning.
+        explicit_identity_augmentation = TorchAudiomentationsIdentity()
+        # The warning message suggests that 'target_rate' is inferred to 50.
+        # Setting this attribute might prevent the warning.
+        setattr(explicit_identity_augmentation, 'target_rate', 16000)
+        
         # Configure task
         mls_task = MultiLabelSegmentation(
             protocol,
             duration=2.0,
             batch_size=32,
             num_workers=4,
-            classes=['kchi', 'och', 'mal', 'fem', 'ovh']
+            classes=['KCHI', 'OCH', 'MAL', 'FEM', 'SPEECH']
         )
         logger.info("Configured MultiLabelSegmentation task")
 
