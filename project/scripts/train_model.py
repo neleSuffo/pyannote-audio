@@ -1,9 +1,10 @@
 import os
+import logging
 from pyannote.database import registry, FileFinder
 from pyannote.audio.tasks import MultiLabelSegmentation
 from pyannote.audio.models.segmentation import SSeRiouSS
 from pytorch_lightning import Trainer
-import logging
+from torch_audiomentations import Identity as TorchAudiomentationsIdentity # <--- ADD THIS LINE
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
