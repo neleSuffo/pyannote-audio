@@ -7,7 +7,7 @@ from pytorch_lightning import LightningModule
 import logging
 
 # Set up logging
-logging.basicConfig(level=logging.INFO, filename='outputs/pipeline_optimization.log', filemode='w')
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def optimize_pipeline():
@@ -25,7 +25,7 @@ def optimize_pipeline():
 
         # Load dataset
         file_finder = FileFinder()
-        registry.load_database("/home/nele_pauline_suffo/projects/pyannote-audio/database.yml")
+        registry.load_database("/home/nele_pauline_suffo/projects/pyannote-audio/project/data/database.yml")
         protocol = registry.get_protocol(
             'ChildLens.SpeakerDiarization.audio',
             preprocessors={"audio": lambda x: str(file_finder(x))}
