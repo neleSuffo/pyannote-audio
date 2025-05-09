@@ -48,7 +48,7 @@ def optimize_pipeline():
         initial_params = {
             "thresholds": {
                 "KCHI": {"onset": 0.6, "offset": 0.4},
-                "OCH": {"onset": 0.6, "offset": 0.4},
+                "CHI": {"onset": 0.6, "offset": 0.4},
                 "FEM": {"onset": 0.6, "offset": 0.4},
                 "MAL": {"onset": 0.6, "offset": 0.4},
                 "OVH": {"onset": 0.6, "offset": 0.4},
