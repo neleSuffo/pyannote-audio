@@ -4,7 +4,7 @@ from pyannote.database import registry, FileFinder
 from pyannote.audio.tasks import MultiLabelSegmentation
 from pyannote.audio.models.segmentation import SSeRiouSS
 from pytorch_lightning import Trainer
-from torch_audiomentations import Identity as TorchAudiomentationsIdentity # <--- ADD THIS LINE
+from torch_audiomentations import Identity as TorchAudiomentationsIdentity
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -38,9 +38,9 @@ def train_model():
         mls_task = MultiLabelSegmentation(
             protocol,
             duration=2.0,
-            batch_size=32,
-            num_workers=4,
-            classes=['KCHI', 'OCH', 'MAL', 'FEM', 'SPEECH']
+            batch_size=64,
+            num_workers=47,
+            classes=['KCHI', 'CHI', 'MAL', 'FEM', 'OVH']
         )
         logger.info("Configured MultiLabelSegmentation task")
 
@@ -51,7 +51,7 @@ def train_model():
         # Configure trainer
         trainer = Trainer(
             devices=1,
-            max_epochs=1,
+            max_epochs=200,
             default_root_dir=checkpoint_dir,
             enable_checkpointing=True
         )
