@@ -1,16 +1,45 @@
 import os
 import json
 import torch
+import logging
+from pyannote.core import Annotation
 from pyannote.audio import Inference
 from pyannote.audio.pipelines import MultiLabelSegmentation as MultiLabelSegmentationPipeline
 from pyannote.database import registry, FileFinder
 from pyannote.metrics.diarization import DiarizationErrorRate
 from pyannote.audio.models.segmentation import SSeRiouSS
-import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+from pyannote.core import Annotation # Ensure this import is present if not already
+
+def write_rttm(file_handle, annotation: Annotation, channel_id: int = 1):
+    """Write a pyannote.core.Annotation object to an RTTM file stream.
+
+    Parameters
+    ----------
+    file_handle : file object
+        An opened file object for writing.
+    annotation : pyannote.core.Annotation
+        The annotation to write. Each track's label will be used as the speaker_id.
+    channel_id : int, optional
+        The channel identifier (field #3 in RTTM). Defaults to 1.
+    """
+    uri = getattr(annotation, 'uri', 'NA') # Get URI from annotation, default to 'NA' if not set
+
+    for segment, _track_id, speaker_id in annotation.itertracks(yield_label=True):
+        start_time = segment.start
+        duration = segment.duration
+
+        # RTTM format: type uri channel_id start_time duration <NA> <NA> speaker_id <NA> <NA>
+        line = (
+            f"SPEAKER {uri} {channel_id} "
+            f"{start_time:.3f} {duration:.3f} "
+            f"<NA> <NA> {speaker_id} <NA> <NA>\n"
+        )
+        file_handle.write(line)
 
 def run_inference():
     try:
@@ -57,24 +86,27 @@ def run_inference():
 
         # Initialize metric
         metric = DiarizationErrorRate()
-        logger.info("Initialized DetectionErrorRate metric")
+        logger.info("Initialized DiarizationErrorRate metric")
 
         # Run inference and evaluation
         for file in protocol.test():
             file_id = file["uri"]
-            speech = optimized_pipeline(file)
-            _ = metric(file['annotation'], speech, uem=file['annotated'])
+            print(f"Processing file: {file_id}")
+            # The pipeline returns an Annotation object
+            speech_annotation = optimized_pipeline(file)
+            _ = metric(file['annotation'], speech_annotation, uem=file['annotated'])
             output_path = os.path.join(results_dir, f"{file_id}.rttm")
+            # Use write_rttm to save the Annotation object
             with open(output_path, "w") as f:
-                speech.write(f)
+                write_rttm(f, speech_annotation) # Use the defined write_rttm here
             logger.info(f"Saved inference result for {file_id} to {output_path}")
 
-        # Compute and log detection error rate
-        detection_error_rate = abs(metric)
-        logger.info(f"Detection error rate = {detection_error_rate * 100:.1f}%")
-        with open(os.path.join(results_dir, "detection_error_rate.txt"), "w") as f:
-            f.write(f"Detection error rate = {detection_error_rate * 100:.1f}%")
-        logger.info("Saved detection error rate")
+        # Compute and log diarization error rate
+        diarization_error_rate = abs(metric) # Corrected variable name
+        logger.info(f"Diarization error rate = {diarization_error_rate * 100:.1f}%")
+        with open(os.path.join(results_dir, "diarization_error_rate.txt"), "w") as f: # Corrected filename
+            f.write(f"Diarization error rate = {diarization_error_rate * 100:.1f}%")
+        logger.info("Saved diarization error rate")
 
         return True
 
