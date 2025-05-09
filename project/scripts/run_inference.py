@@ -3,7 +3,7 @@ import json
 import torch
 from pyannote.audio import Inference
 from pyannote.audio.pipelines import MultiLabelSegmentation as MultiLabelSegmentationPipeline
-from pyannote.database import registry, FileFinde
+from pyannote.database import registry, FileFinder
 from pyannote.metrics.diarization import DetectionErrorRate
 from pytorch_lightning import LightningModule
 import logging
