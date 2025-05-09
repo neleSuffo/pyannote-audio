@@ -91,7 +91,6 @@ def run_inference():
         # Run inference and evaluation
         for file in protocol.test():
             file_id = file["uri"]
-            print(f"Processing file: {file_id}")
             # The pipeline returns an Annotation object
             speech_annotation = optimized_pipeline(file)
             _ = metric(file['annotation'], speech_annotation, uem=file['annotated'])
