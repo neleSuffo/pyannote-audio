@@ -2,22 +2,19 @@ import os
 import json
 import torch
 import logging
+import argparse
 from pyannote.core import Annotation
-from pyannote.audio import Inference
 from pyannote.audio.pipelines import MultiLabelSegmentation as MultiLabelSegmentationPipeline
 from pyannote.database import registry, FileFinder
 from pyannote.metrics.diarization import DiarizationErrorRate
-from pyannote.audio.models.segmentation import SSeRiouSS
+from pyannote.audio.models.segmentation import SSeRiouSS, PyanNet
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-from pyannote.core import Annotation # Ensure this import is present if not already
-
 def write_rttm(file_handle, annotation: Annotation, channel_id: int = 1):
     """Write a pyannote.core.Annotation object to an RTTM file stream.
-
     Parameters
     ----------
     file_handle : file object
@@ -33,7 +30,6 @@ def write_rttm(file_handle, annotation: Annotation, channel_id: int = 1):
         start_time = segment.start
         duration = segment.duration
 
-        # RTTM format: type uri channel_id start_time duration <NA> <NA> speaker_id <NA> <NA>
         line = (
             f"SPEAKER {uri} {channel_id} "
             f"{start_time:.3f} {duration:.3f} "
@@ -41,20 +37,20 @@ def write_rttm(file_handle, annotation: Annotation, channel_id: int = 1):
         )
         file_handle.write(line)
 
-def run_inference():
+def run_inference(model_name: str): # Add model_name argument
     try:
-        # Define paths
-        checkpoint_path = "outputs/model_checkpoints/mls_model.ckpt"
-        optimized_params_path = "outputs/configs/optimized_pipeline_params.json"
-        results_dir = "outputs/inference_results"
+        # Define paths based on model_name
+        checkpoint_path = f"outputs/model_checkpoints_{model_name}/mls_model_{model_name}.ckpt"
+        optimized_params_path = f"outputs/configs_{model_name}/optimized_pipeline_params_{model_name}.json"
+        results_dir = f"outputs/inference_results_{model_name}" # Make results directory model-specific
         os.makedirs(results_dir, exist_ok=True)
 
         # Check if model checkpoint and optimized parameters exist
         if not os.path.exists(checkpoint_path):
-            logger.error(f"Model checkpoint not found at {checkpoint_path}")
+            logger.error(f"Model checkpoint not found at {checkpoint_path} for model {model_name}")
             return False
         if not os.path.exists(optimized_params_path):
-            logger.error(f"Optimized parameters not found at {optimized_params_path}")
+            logger.error(f"Optimized parameters not found at {optimized_params_path} for model {model_name}")
             return False
 
         # Load dataset
@@ -66,9 +62,15 @@ def run_inference():
         )
         logger.info("Loaded ChildLens dataset")
 
-        # Load model
-        mls_model = SSeRiouSS.load_from_checkpoint(checkpoint_path)
-        logger.info("Loaded trained model from checkpoint")
+        # Load model - choose class based on model_name
+        if model_name.lower() == "sseriouss":
+            mls_model = SSeRiouSS.load_from_checkpoint(checkpoint_path)
+        elif model_name.lower() == "pyannet":
+            mls_model = PyanNet.load_from_checkpoint(checkpoint_path)
+        else:
+            logger.error(f"Unsupported model name: {model_name} for loading checkpoint.")
+            return False
+        logger.info(f"Loaded trained {model_name} model from checkpoint")
 
         # Initialize pipeline
         pipeline = MultiLabelSegmentationPipeline(
@@ -93,30 +95,45 @@ def run_inference():
             file_id = file["uri"]
             # The pipeline returns an Annotation object
             speech_annotation = optimized_pipeline(file)
+            # Set the URI for the annotation if the pipeline doesn't do it
+            if not getattr(speech_annotation, 'uri', None):
+                speech_annotation.uri = file_id
+
             _ = metric(file['annotation'], speech_annotation, uem=file['annotated'])
             output_path = os.path.join(results_dir, f"{file_id}.rttm")
             # Use write_rttm to save the Annotation object
             with open(output_path, "w") as f:
-                write_rttm(f, speech_annotation) # Use the defined write_rttm here
+                write_rttm(f, speech_annotation)
             logger.info(f"Saved inference result for {file_id} to {output_path}")
 
         # Compute and log diarization error rate
-        diarization_error_rate = abs(metric) # Corrected variable name
-        logger.info(f"Diarization error rate = {diarization_error_rate * 100:.1f}%")
-        with open(os.path.join(results_dir, "diarization_error_rate.txt"), "w") as f: # Corrected filename
-            f.write(f"Diarization error rate = {diarization_error_rate * 100:.1f}%")
-        logger.info("Saved diarization error rate")
+        diarization_error_rate = abs(metric)
+        logger.info(f"Diarization error rate for {model_name} = {diarization_error_rate * 100:.1f}%")
+        der_summary_path = os.path.join(results_dir, f"diarization_error_rate_{model_name}.txt")
+        with open(der_summary_path, "w") as f:
+            f.write(f"Diarization error rate for {model_name} = {diarization_error_rate * 100:.1f}%")
+        logger.info(f"Saved diarization error rate for {model_name} to {der_summary_path}")
 
         return True
 
     except Exception as e:
-        logger.error(f"Error in run_inference: {str(e)}")
+        logger.error(f"Error in run_inference for {model_name}: {str(e)}")
         return False
 
 if __name__ == "__main__":
-    logger.info("Starting inference")
-    success = run_inference()
+    parser = argparse.ArgumentParser(description="Run inference with a multi-label segmentation pipeline.")
+    parser.add_argument(
+        "--model",
+        type=str,
+        required=True,
+        choices=["sseriouss", "pyannet"],
+        help="The model architecture whose pipeline to use for inference ('sseriouss' or 'pyannet')."
+    )
+    args = parser.parse_args()
+
+    logger.info(f"Starting inference for model {args.model}")
+    success = run_inference(model_name=args.model)
     if success:
-        logger.info("Inference completed successfully")
+        logger.info(f"Inference for model {args.model} completed successfully")
     else:
-        logger.error("Inference failed")
+        logger.error(f"Inference for model {args.model} failed")
