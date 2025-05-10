@@ -10,10 +10,6 @@ logger = logging.getLogger(__name__)
 
 def prepare_data():
     try:
-        # Define output paths
-        output_dir = "outputs/configs"
-        os.makedirs(output_dir, exist_ok=True)
-
         # Initialize file finder
         file_finder = FileFinder()
         logger.info("Initialized FileFinder")
