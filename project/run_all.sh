@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Check if a model argument is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <model_name>"
+    echo "Example: $0 sseriouss"
+    echo "Example: $0 pyannet"
+    exit 1
+fi
+
+MODEL_NAME=$1
+echo "Running all scripts for model: $MODEL_NAME"
+
 echo "Running data preparation..."
 python scripts/prepare_data.py
 if [ $? -ne 0 ]; then
@@ -7,25 +18,25 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "Running model training..."
-python scripts/train_model.py
+echo "Running model training for $MODEL_NAME..."
+python scripts/train_model.py --model "$MODEL_NAME"
 if [ $? -ne 0 ]; then
-    echo "Model training failed"
+    echo "Model training for $MODEL_NAME failed"
     exit 1
 fi
 
-echo "Running pipeline parameter optimization..."
-python scripts/optimize_pipeline.py
+echo "Running pipeline parameter optimization for $MODEL_NAME..."
+python scripts/optimize_pipeline.py --model "$MODEL_NAME"
 if [ $? -ne 0 ]; then
-    echo "Pipeline parameter optimization failed"
+    echo "Pipeline parameter optimization for $MODEL_NAME failed"
     exit 1
 fi
 
-# echo "Running inference..."
-# python scripts/run_inference.py
+# echo "Running inference for $MODEL_NAME..."
+# python scripts/run_inference.py --model "$MODEL_NAME"
 # if [ $? -ne 0 ]; then
-#     echo "Inference failed"
+#     echo "Inference for $MODEL_NAME failed"
 #     exit 1
 # fi
 
-echo "All scripts completed successfully"
+echo "All scripts completed successfully for model: $MODEL_NAME"
