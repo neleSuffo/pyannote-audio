@@ -1,21 +1,21 @@
 import os
 import logging
+import argparse
 from pyannote.database import registry, FileFinder
 from pyannote.audio.tasks import MultiLabelSegmentation
-from pyannote.audio.models.segmentation import SSeRiouSS
+from pyannote.audio.models.segmentation import SSeRiouSS, PyanNet
 from pytorch_lightning import Trainer
-from torch_audiomentations import Identity as TorchAudiomentationsIdentity
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def train_model():
+def train_model(model_name: str):
     try:
         # Define output paths
-        checkpoint_dir = "outputs/model_checkpoints"
+        checkpoint_dir = f"outputs/model_checkpoints_{model_name}" # Make checkpoint_dir model-specific
         os.makedirs(checkpoint_dir, exist_ok=True)
-        checkpoint_path = os.path.join(checkpoint_dir, "mls_model.ckpt")
+        checkpoint_path = os.path.join(checkpoint_dir, f"mls_model_{model_name}.ckpt")
 
         # Load dataset
         file_finder = FileFinder()
@@ -25,14 +25,6 @@ def train_model():
             preprocessors={"audio": lambda x: str(file_finder(x))}
         )
         logger.info("Loaded ChildLens dataset")
-
-        # Create default augmentation instance
-        # pyannote.audio uses torch_audiomentations.Identity by default if no augmentation is provided.
-        # We explicitly create it here to set the 'target_rate' attribute to potentially silence the warning.
-        explicit_identity_augmentation = TorchAudiomentationsIdentity()
-        # The warning message suggests that 'target_rate' is inferred to 50.
-        # Setting this attribute might prevent the warning.
-        setattr(explicit_identity_augmentation, 'target_rate', 16000)
         
         # Configure task
         mls_task = MultiLabelSegmentation(
@@ -40,14 +32,21 @@ def train_model():
             duration=2.0,
             batch_size=64,
             num_workers=47,
-            classes=['KCHI', 'CHI', 'MAL', 'FEM', 'OVH']
+            classes=['KCHI', 'CHI', 'MAL', 'FEM', 'OVH', 'SPEECH'],
         )
         logger.info("Configured MultiLabelSegmentation task")
 
-        # Initialize model
-        mls_model = SSeRiouSS(task=mls_task, wav2vec="WAVLM_BASE")
-        logger.info("Initialized SSeRiouSS model")
-
+        # Initialize model based on the argument
+        if model_name.lower() == "sseriouss":
+            mls_model = SSeRiouSS(task=mls_task, wav2vec="WAVLM_BASE")
+            logger.info("Initialized SSeRiouSS model")
+        elif model_name.lower() == "pyannet":
+            mls_model = PyanNet(task=mls_task)
+            logger.info("Initialized PyanNet model")
+        else:
+            logger.error(f"Unsupported model name: {model_name}. Choose 'sseriouss' or 'pyannet'.")
+            return False
+        
         # Configure trainer
         trainer = Trainer(
             devices=1,
@@ -59,7 +58,7 @@ def train_model():
 
         # Train model
         trainer.fit(mls_model)
-        logger.info("Model training completed")
+        logger.info(f"Model training completed for {model_name}")
 
         # Save final checkpoint
         trainer.save_checkpoint(checkpoint_path)
@@ -68,13 +67,23 @@ def train_model():
         return True
 
     except Exception as e:
-        logger.error(f"Error in train_model: {str(e)}")
+        logger.error(f"Error in train_model for {model_name}: {str(e)}")
         return False
 
 if __name__ == "__main__":
-    logger.info("Starting model training")
-    success = train_model()
+    parser = argparse.ArgumentParser(description="Train a multi-label segmentation model.")
+    parser.add_argument(
+        "--model", 
+        type=str, 
+        required=True, 
+        choices=["sseriouss", "pyannet"],
+        help="The model architecture to train ('sseriouss' or 'pyannet')."
+    )
+    args = parser.parse_args()
+
+    logger.info(f"Starting model training for {args.model}")
+    success = train_model(model_name=args.model)
     if success:
-        logger.info("Model training completed successfully")
+        logger.info(f"Model training for {args.model} completed successfully")
     else:
-        logger.error("Model training failed")
+        logger.error(f"Model training for {args.model} failed")
