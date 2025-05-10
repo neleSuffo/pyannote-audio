@@ -13,7 +13,6 @@ def prepare_data():
         # Define output paths
         output_dir = "outputs/configs"
         os.makedirs(output_dir, exist_ok=True)
-        task_config_path = os.path.join(output_dir, "mls_task_config.json")
 
         # Initialize file finder
         file_finder = FileFinder()
@@ -33,20 +32,9 @@ def prepare_data():
             duration=2.0,
             batch_size=64,
             num_workers=47,
-            classes=['KCHI', 'CHI', 'MAL', 'FEM', 'OVH']
+            classes=['KCHI', 'CHI', 'MAL', 'FEM', 'OVH', 'SPEECH'],
         )
         logger.info("Configured MultiLabelSegmentation task")
-
-        # Save task configuration
-        task_config = {
-            "duration": mls_task.duration,
-            "batch_size": mls_task.batch_size,
-            "num_workers": mls_task.num_workers,
-            "classes": mls_task.classes
-        }
-        with open(task_config_path, 'w') as f:
-            json.dump(task_config, f, indent=4)
-        logger.info(f"Saved task configuration to {task_config_path}")
 
         return True
 
