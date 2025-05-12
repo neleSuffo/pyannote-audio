@@ -31,7 +31,7 @@ def train_model(model_name: str):
             protocol,
             duration=2.0,
             batch_size=64,
-            num_workers=47,
+            num_workers=12,
             classes=['KCHI', 'CHI', 'MAL', 'FEM', 'OVH', 'SPEECH'],
         )
         logger.info("Configured MultiLabelSegmentation task")
@@ -47,9 +47,16 @@ def train_model(model_name: str):
             logger.error(f"Unsupported model name: {model_name}. Choose 'sseriouss' or 'pyannet'.")
             return False
         
+        # Move model to GPU explicitly
+        mls_model = mls_model.to("cuda:0")
+        logger.info(f"Moved {model_name} model to cuda:0")
+        
+        print(f"Model device: {next(mls_model.parameters()).device}")
+        
         # Configure trainer
         trainer = Trainer(
-            devices=1,
+            devices=[0],
+            accelerator="gpu",
             max_epochs=200,
             default_root_dir=checkpoint_dir,
             enable_checkpointing=True
