@@ -27,8 +27,9 @@ def prepare_data():
             protocol,
             duration=2.0,
             batch_size=64,
-            num_workers=47,
+            num_workers=12,
             classes=['KCHI', 'CHI', 'MAL', 'FEM', 'OVH', 'SPEECH'],
+            pin_memory=True,
         )
         logger.info("Configured MultiLabelSegmentation task")
 
