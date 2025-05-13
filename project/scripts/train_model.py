@@ -38,10 +38,10 @@ def train_model(model_name: str):
 
         # Initialize model based on the argument
         if model_name.lower() == "sseriouss":
-            mls_model = SSeRiouSS(task=mls_task, wav2vec="WAVLM_BASE")
+            mls_model = SSeRiouSS(task=mls_task, wav2vec="WAVLM_BASE", linear={"hidden_size": 128, "num_layers": 3})
             logger.info("Initialized SSeRiouSS model")
         elif model_name.lower() == "pyannet":
-            mls_model = PyanNet(task=mls_task)
+            mls_model = PyanNet(task=mls_task, linear={"hidden_size": 128, "num_layers": 3})
             logger.info("Initialized PyanNet model")
         else:
             logger.error(f"Unsupported model name: {model_name}. Choose 'sseriouss' or 'pyannet'.")
