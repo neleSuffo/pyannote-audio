@@ -2,6 +2,7 @@ import os
 import json
 import argparse # Import argparse
 from pyannote.database import registry, FileFinder
+from pyannote.audio.pipelines import SpeakerDiarization as SpeakerDiarizationPipeline
 from pyannote.audio.pipelines import MultiLabelSegmentation as MultiLabelSegmentationPipeline
 from pyannote.pipeline import Optimizer
 from pyannote.audio.models.segmentation import SSeRiouSS, PyanNet
@@ -44,12 +45,12 @@ def optimize_pipeline(model_name: str):
         logger.info(f"Loaded trained {model_name} model from checkpoint")
 
         # Initialize pipeline
-        pipeline = MultiLabelSegmentationPipeline(
+        pipeline = SpeakerDiarizationPipeline(
             segmentation=mls_model,
             share_min_duration=True,
             fscore=True
         )
-        logger.info("Initialized MultiLabelSegmentationPipeline")
+        logger.info("Initialized SpeakerDiarizationPipeline")
 
         # Define initial parameters
         initial_params = {
